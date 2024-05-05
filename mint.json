@@ -83,8 +83,7 @@
     }
   ],
   "footerSocials": {
-    "twitter": "https://twitter.com/mintlify",
-    "github": "https://github.com/mintlify",
-    "linkedin": "https://www.linkedin.com/company/mintsearch"
+    "x": "https://x.com/OpenAgentsInc",
+    "github": "https://github.com/OpenAgentsInc"
   }
 }
