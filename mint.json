@@ -53,7 +53,7 @@
       ]
     },
     {
-      "group": "Capabilities",
+      "group": "Agent Capabilities",
       "pages": [
         "capabilities/indexing"
       ]
