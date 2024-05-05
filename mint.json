@@ -48,13 +48,22 @@
       "group": "Get Started",
       "pages": [
         "introduction",
-        "quickstart",
-        "development"
+        "chat",
+        "build-an-agent"
       ]
     },
     {
-      "group": "Essentials",
+      "group": "Advanced",
       "pages": [
+        "plugins",
+        "api"
+      ]
+    },
+    {
+      "group": "Mintlify basics",
+      "pages": [
+        "quickstart",
+        "development",
         "essentials/markdown",
         "essentials/code",
         "essentials/images",
