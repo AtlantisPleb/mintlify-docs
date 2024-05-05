@@ -20,10 +20,6 @@
     }
   },
   "topbarLinks": [],
-  "topbarCtaButton": {
-    "name": "OpenAgents Home",
-    "url": "https://openagents.com"
-  },
   "tabs": [
     {
       "name": "API Reference",
@@ -32,19 +28,14 @@
   ],
   "anchors": [
     {
-      "name": "Documentation",
-      "icon": "book-open-cover",
-      "url": "https://mintlify.com/docs"
-    },
-    {
-      "name": "Community",
-      "icon": "slack",
-      "url": "https://mintlify.com/community"
+      "name": "Home",
+      "icon": "house",
+      "url": "https://openagents.com"
     },
     {
       "name": "Blog",
       "icon": "newspaper",
-      "url": "https://mintlify.com/blog"
+      "url": "https://openagents.com/blog"
     }
   ],
   "navigation": [
