@@ -53,6 +53,12 @@
       ]
     },
     {
+      "group": "Capabilities",
+      "pages": [
+        "capabilities/indexing"
+      ]
+    },
+    {
       "group": "Advanced",
       "pages": [
         "plugins",
