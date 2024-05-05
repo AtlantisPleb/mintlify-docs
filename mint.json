@@ -33,14 +33,14 @@
       "url": "https://openagents.com"
     },
     {
-      "name": "Blog",
-      "icon": "newspaper",
-      "url": "https://openagents.com/blog"
-    },
-    {
       "name": "GitHub",
       "icon": "github",
       "url": "https://github.com/OpenAgentsInc/openagents"
+    },
+    {
+      "name": "Changelog",
+      "icon": "newspaper",
+      "url": "https://openagents.com/changelog"
     }
   ],
   "navigation": [
