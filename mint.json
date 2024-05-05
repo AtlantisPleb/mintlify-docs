@@ -19,15 +19,10 @@
       "dark": "#000000"
     }
   },
-  "topbarLinks": [
-    {
-      "name": "Support",
-      "url": "mailto:hi@mintlify.com"
-    }
-  ],
+  "topbarLinks": [],
   "topbarCtaButton": {
-    "name": "Dashboard",
-    "url": "https://dashboard.mintlify.com"
+    "name": "OpenAgents Home",
+    "url": "https://openagents.com"
   },
   "tabs": [
     {
