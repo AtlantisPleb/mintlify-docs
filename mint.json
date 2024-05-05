@@ -41,11 +41,6 @@
       "name": "GitHub",
       "icon": "github",
       "url": "https://github.com/OpenAgentsInc/openagents"
-    },
-    {
-      "name": "X",
-      "icon": "x",
-      "url": "https://x.com/OpenAgentsInc"
     }
   ],
   "navigation": [
