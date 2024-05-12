@@ -194,15 +194,11 @@ class JobContext(node: OpenAgentsNode, runner: JobRunner, job: )
 
 ```
 
-Jobs are executed synchronously by default and the same  Runner instance processes every job.
+Jobs are executed synchronously by default and the same [runner](https://openagentsinc.github.io/openagents-node-python-sdk/JobRunner.html#openagents.JobRunner.JobRunner.setRunInParallel) instance processes every job.
 
+- `setRunInParallel(False)` it will do it synchronously.
 
-Calling [`setRunInParallel(self, runInParallel: true)`](https://openagentsinc.github.io/openagents-node-python-sdk/JobRunner.html#openagents.JobRunner.JobRunner.setRunInParallel) inside the jobrunner you get parallel execution.
-
-- if `setRunInParallel(False)` it will do it synchronously.
-
-- if `setRunInParallel(True)` will do it in parallel.
-
+- `setRunInParallel(True)` will do it in parallel.
 
 ```bash
 def setRunInParallel(self, runInParallel:bool):
