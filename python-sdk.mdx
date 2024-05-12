@@ -8,14 +8,14 @@ icon: 'code'
   **Prerequisite:** Python version 3.12 or higher.
 </Info>
 
-1. ## Install the Python SDK on your OS
+## 1. Install the Python SDK on your OS
 
 
 ```bash
 pip install openagents-node-sdk
 ```
 
-2. ## Create a runner
+## 2. Create a runner
 
 - Templates are based on the [NIP-01 implementation](https://github.com/nostr-protocol/nips/blob/master/01.md).
 
@@ -27,7 +27,7 @@ The runner class must be defined with all the parameters that are required by th
 
 - Definition of a runner class:
 
-```bash
+```python
 class MyRunner (JobRunner):
     def __init__(self):
         # Set the runner metadata, template and filter
@@ -39,7 +39,7 @@ class MyRunner (JobRunner):
 
 The “kind” value should always be “5003”, as this is the standard currently adopted by OpenAgents.
 
-```bash
+```python
 meta={
     "kind":5003,
     "name":"My Action",
@@ -56,7 +56,7 @@ meta={
 **Filters** are used to fetch jobs.
 
 
-```bash
+```python
 filter={
     "filterByKind":5003,
     #AND
@@ -67,17 +67,21 @@ If you want to implement a worker for a standard nip-90 type job, like a kind [5
 
 In **template** there can be one or more inputs in the predefined tags:
 
-    `["i", "{{value}}", "{{type}}", "",  "query"]`
+```python
+["i", "{{value}}", "{{type}}", "",  "query"]
+```
 
 There can also be 0 or more parameters, prefixed with param, then the key (name) and the value:
 
-    `["param","run-on", "my-new-action" ]`
+```python
+["param","run-on", "my-new-action" ]
+```
 
 `run-on` is mandatory if and only if you create a 5003 event.
 
 Events can be compiled with anything that is allowed in the [NIPs](https://github.com/nostr-protocol/nips).
 
-```bash
+```python
 template="""
 {
     "kind": {{meta.kind}},
@@ -101,7 +105,7 @@ You must have a "socket in" dictionary for inputs and a "socket out" for ouputs.
 
 In `in` you can put whatever you want. These are the event values. You can call them with `in.something`.
 
-```bash
+```python
 sockets={
     "in": {
         "k": {
@@ -130,7 +134,7 @@ sockets={
 }
 ```
 
-3. ## Program the main logic of your node and initialize
+## 3. Program the main logic of your node and initialize
 
 [API documentation](https://openagentsinc.github.io/openagents-node-python-sdk/index.html) for the SDK methods.
 
@@ -151,41 +155,42 @@ The `ctx` object contains several methods that can be used to get useful informa
 
 `canRun` is a filter. Can be used to perform checks before deciding whether to run the job (`bool`):
 
-```bash
+```python
 async def canRun(self,ctx):
-        # Custom job filtering logic
-        return True
+    # Custom job filtering logic
+    return True
 ```
 
 `preRun` is a hook that runs before `run`. It can be useful depending on the case:
 
-```bash
+```python
 async def preRun(self, ctx):
-        # Do something before running the job
-        pass
+    # Do something before running the job
+    pass
 ```
 
 `postRun` executes some code after the main logic in `run` has been executed. It can be useful depending on the case:
 
-```bash
+```python
 async def postRun(self, ctx):
-        # Do something after running the job
-        pass
+    # Do something after running the job
+    pass
 ```
 
 `run` is the main method, the one on which the node's core logic must be implemented:
 
-```bash
+```python
 async def run(self,ctx):
-        # Do something
-        print("Running job",job.id)
-        # Finish the job
-        jobOutput=""
-        return jobOutput
+    # Do something
+    print("Running job",job.id)
+    # Finish the job
+    jobOutput=""
+    return jobOutput
 ```
 
 #### Parallel execution - Advanced
 
 A single instance of the JobRunner is used to process each compatible job, by default this happens synchronously (ie. the next job will start after the end of the previous job).
 It is possible to configure the runner to run the jobs in parallel by calling `self.setRunInParallel(True)` inside the `init` method.
-*Note: Parallel runners should be written in valid non-blocking [asyncio](https://docs.python.org/3/library/asyncio.html) code*
+
+*Note: Parallel runners should be written in valid non-blocking [asyncio](https://docs.python.org/3/library/asyncio.html) code.*
