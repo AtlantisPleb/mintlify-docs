@@ -53,7 +53,7 @@ meta={
                 },
 ```
 
-**Filters** are used to fetch nodes.
+**Filters** are used to fetch jobs.
 
 
 ```bash
@@ -63,7 +63,7 @@ filter={
                     "filterByRunOn": "my-new-action"
                 },
 ```
-If you want to implement a worker for a standard nip-90 type job, like a kind 5001 (text generation), then you must filter by type. Standard type jobs have no "run-on".
+If you want to implement a worker for a standard nip-90 type job, like a kind [5050](https://github.com/nostr-protocol/data-vending-machines/blob/master/kinds/5050.md) (text generation), then you must filter by type. Standard type jobs have no "run-on".
 
 In **template** there can be one or more inputs in the predefined tags:
 
@@ -99,7 +99,7 @@ template="""
 
 You must have a "socket in" dictionary for inputs and a "socket out" for ouputs. 
 
-In `in` you can put whatever you want. These are the event values ​​called with `in.something`.
+In `in` you can put whatever you want. These are the event values. You can call them with `in.something`.
 
 ```bash
 sockets={
@@ -144,9 +144,7 @@ async def init(self, node):
        pass
 ```
 
-The constructor is not necessarily in the loop, so to use asyncio you need to start it.
-
-Initialization of everything, including the constructor, is done on `init`.
+Initialization of everything is done on `init`.
 
 `Init` and `loop` have `node`, not `ctx`, so they use the node API (explanation of what ctx is in the "Parallel Execution" section below).
 
@@ -196,9 +194,15 @@ class JobContext(node: OpenAgentsNode, runner: JobRunner, job: )
 
 ```
 
-For parallel execution without concurrency problems, the runner does not automatically work in parallel upon creation, but is synchronous by default. A normal `run` is synchronous.
+Jobs are executed synchronously by default and the same  Runner instance processes every job.
 
-Calling [setRunInParallel(self, runInParallel: true)](https://openagentsinc.github.io/openagents-node-python-sdk/JobRunner.html#openagents.JobRunner.JobRunner.setRunInParallel)) inside the jobrunner you get parallel execution.
+
+Calling [`setRunInParallel(self, runInParallel: true)`](https://openagentsinc.github.io/openagents-node-python-sdk/JobRunner.html#openagents.JobRunner.JobRunner.setRunInParallel) inside the jobrunner you get parallel execution.
+
+- if `setRunInParallel(False)` it will do it synchronously.
+
+- if `setRunInParallel(True)` will do it in parallel.
+
 
 ```bash
 def setRunInParallel(self, runInParallel:bool):
