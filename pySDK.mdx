@@ -1,0 +1,219 @@
+---
+title: 'Python SDK'
+description: 'A Python SDK for node development'
+icon: 'screwdriver-wrench'
+---
+
+<Info>
+  **Prerequisite:** Python version 3.12 or higher.
+</Info>
+
+1. ## Install the Python SDK on your OS
+
+
+```bash
+pip install openagents-node-sdk
+```
+
+2. ## Define a runner
+
+- Templates are based on the [NIP-01 implementation](https://github.com/nostr-protocol/nips/blob/master/01.md).
+
+- A template must follow the [NIP-90 implementation](https://github.com/nostr-protocol/nips/blob/master/90.md).
+
+Node example [here](https://github.com/OpenAgentsInc/openagents-node-python-sdk) ("RunnerConfig" code block): 
+        
+The runner class must be defined with all the parameters that are required by the NIPs.
+
+- Definition of a runner class:
+
+```bash
+class MyRunner (JobRunner):
+    def __init__(self):
+        # Set the runner metadata, template and filter
+        super().__init__(\
+            RunnerConfig(
+```
+
+**Metadata** are required. You can set them in the "meta" object. This is general information about the node, so you can enter whatever you want.
+
+The “kind” value should always be “5003”, as this is the standard currently adopted by OpenAgents.
+
+```bash
+meta={
+                    "kind":5003,
+                    "name":"My Action",
+                    "description":"This is a new action"
+                    "tos": "https://example.com/tos",
+                    "privacy": "https://example.com/privacy",
+                    "picture": "https://example.com/icon.png",
+                    "tags": ["tag1","tag2"]
+                    "website": "https://example.com",
+                    "author": "John Doe",
+                },
+```
+
+**Filters** are used to fetch nodes.
+
+
+```bash
+filter={
+                    "filterByKind":5003,
+                    #AND
+                    "filterByRunOn": "my-new-action"
+                },
+```
+If you want to implement a worker for a standard nip-90 type job, like a kind 5001 (text generation), then you must filter by type. Standard type jobs have no "run-on".
+
+In **template** there can be one or more inputs in the predefined tags:
+
+    `["i", "{{value}}", "{{type}}", "",  "query"]`
+
+There can also be 0 or more parameters, prefixed with param, then the key (name) and the value:
+
+    `["param","run-on", "my-new-action" ]`
+
+`run-on` is mandatory if and only if you create a 5003 event.
+
+Events can be compiled with anything that is allowed in the [NIPs](https://github.com/nostr-protocol/nips).
+
+```bash
+template="""
+                {
+                    "kind": {{meta.kind}},
+                    "created_at": {{sys.timestamp_seconds}},
+                    "tags": [
+                        ["param","run-on", "my-new-action" ],                             
+                        ["param", "k", "{{in.k}}"],
+                        ["output" , "{{out.content}}"]
+                        {{#in.queries}}
+                        ["i", "{{value}}", "{{type}}", "",  "query"],
+                        {{/in.queries}}                       
+                        ["expiration", "{{sys.expiration_timestamp_seconds}}"],
+                    ],
+                    "content":""
+                }""",
+```
+
+**Socket** is in [json schema](https://json-schema.org/). 
+
+You must have a "socket in" dictionary for inputs and a "socket out" for ouputs. 
+
+In `in` you can put whatever you want. These are the event values ​​called with `in.something`.
+
+```bash
+sockets={
+                    "in": {
+                        "k": {
+                            "title": "K",
+                            "description":"This is a number"
+                            "type":"integer",
+                            "default": 0,
+                        },
+                        "queries": {
+                            "title": "Queries",
+                            "type":"array",
+                            "description":"This is an array of queries",
+                            "items": {
+                                "type":"string"
+                            }
+                        }
+                    },
+                    "out": {
+                        "contentType": {
+                            "title": "Content Type",
+                            "type": "string",
+                            "description": "The content of the event",
+                            "default": "application/json"
+                        }
+                    }
+                }
+```
+
+3. ## Program the main logic of your node and initialize
+
+[API documentation](https://openagentsinc.github.io/openagents-node-python-sdk/JobRunner.html#openagents.JobRunner.JobRunner.init) for the SDK methods.
+
+### Initialize the runner class
+
+The `init` method intitializes the runner class:
+
+```bash
+async def init(self, node):
+       # Initialize class
+       pass
+```
+
+The constructor is not necessarily in the loop, so to use asyncio you need to start it.
+
+Initialization of everything, including the constructor, is done on `init`.
+
+`Init` and `loop` have `node`, not `ctx`, so they use the node API (explanation of what ctx is in the "Parallel Execution" section below).
+
+### Execution methods 
+
+`canRun` is a filter. Can be used to perform checks before deciding whether to run the job (`bool`):
+
+```bash
+async def canRun(self,ctx):
+        # Custom job filtering logic
+        return True
+```
+
+`preRun` is a hook that runs before `run`. It can be useful depending on the case:
+
+```bash
+async def preRun(self, ctx):
+        # Do something before running the job
+        pass
+```
+
+`postRun` executes some code after the main logic in `run` has been executed. It can be useful depending on the case:
+
+```bash
+async def postRun(self, ctx):
+        # Do something after running the job
+        pass
+```
+
+`run` is the main method, the one on which the node's core logic must be implemented:
+
+```bash
+async def run(self,ctx):
+        # Do something
+        print("Running job",job.id)
+        # Finish the job
+        jobOutput=""
+        return jobOutput
+```
+
+#### Parallel execution
+
+Run methods require the `ctx` [job context](https://openagentsinc.github.io/openagents-node-python-sdk/JobContext.html) parameter:
+
+```bash
+class JobContext(node: OpenAgentsNode, runner: JobRunner, job: )
+
+```
+
+For parallel execution without concurrency problems, the runner does not automatically work in parallel upon creation, but is synchronous by default. A normal `run` is synchronous.
+
+Calling [setRunInParallel(self, runInParallel: true)](https://openagentsinc.github.io/openagents-node-python-sdk/JobRunner.html#openagents.JobRunner.JobRunner.setRunInParallel)) inside the jobrunner you get parallel execution.
+
+```bash
+def setRunInParallel(self, runInParallel:bool):
+    """
+    Set whether the runner should run in parallel.
+    Args:
+        runInParallel (bool): True if the runner should run in parallel, False otherwise. Defaults to False.
+    """
+    self.runInParallel = runInParallel
+```
+
+If the runner is in parallel, no field can be placed at class level.
+
+The runner uses asyncio so referring to a class value is not a reliable solution, since there may be persistence issues.
+
+The `ctx` object contains the API to handle this issue.
+
+`ctx` is directly related to the job and allows parallel execution without concurrency issues between nodes.
