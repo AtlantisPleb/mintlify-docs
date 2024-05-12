@@ -24,12 +24,6 @@
     "isHidden": true
   },
   "topbarLinks": [],
-  "tabs": [
-    {
-      "name": "API Reference",
-      "url": "api-reference"
-    }
-  ],
   "anchors": [
     {
       "name": "Home",
