@@ -210,8 +210,6 @@ def setRunInParallel(self, runInParallel:bool):
     self.runInParallel = runInParallel
 ```
 
-If the runner is in parallel, no field can be placed at class level.
-
 The runner uses asyncio so referring to a class value is not a reliable solution, since there may be persistence issues.
 
 The `ctx` object contains the API to handle this issue.
