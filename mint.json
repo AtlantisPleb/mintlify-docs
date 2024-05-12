@@ -66,8 +66,7 @@
       "group": "Advanced",
       "pages": [
         "plugins",
-        "api",
-        "pySDK"
+        "python-sdk"
       ]
     },
     {
@@ -81,12 +80,6 @@
         "essentials/settings",
         "essentials/navigation",
         "essentials/reusable-snippets"
-      ]
-    },
-    {
-      "group": "API Documentation",
-      "pages": [
-        "api-reference/introduction"
       ]
     },
     {

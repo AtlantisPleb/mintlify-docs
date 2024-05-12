@@ -1,7 +1,7 @@
 ---
 title: 'Python SDK'
 description: 'A Python SDK for node development'
-icon: 'screwdriver-wrench'
+icon: 'code'
 ---
 
 <Info>
@@ -21,8 +21,8 @@ pip install openagents-node-sdk
 
 - A template must follow the [NIP-90 implementation](https://github.com/nostr-protocol/nips/blob/master/90.md).
 
-Node example [here](https://github.com/OpenAgentsInc/openagents-node-python-sdk) ("RunnerConfig" code block): 
-        
+Node example [here](https://github.com/OpenAgentsInc/openagents-node-python-sdk) ("RunnerConfig" code block):
+
 The runner class must be defined with all the parameters that are required by the NIPs.
 
 - Definition of a runner class:
@@ -83,21 +83,21 @@ template="""
     "kind": {{meta.kind}},
     "created_at": {{sys.timestamp_seconds}},
     "tags": [
-        ["param","run-on", "my-new-action" ],                             
+        ["param","run-on", "my-new-action" ],
         ["param", "k", "{{in.k}}"],
         ["output" , "{{out.content}}"]
         {{#in.queries}}
         ["i", "{{value}}", "{{type}}", "",  "query"],
-        {{/in.queries}}                       
+        {{/in.queries}}
         ["expiration", "{{sys.expiration_timestamp_seconds}}"],
     ],
     "content":""
 }""",
 ```
 
-**Socket** is in [json schema](https://json-schema.org/). 
+**Socket** is in [json schema](https://json-schema.org/).
 
-You must have a "socket in" dictionary for inputs and a "socket out" for ouputs. 
+You must have a "socket in" dictionary for inputs and a "socket out" for ouputs.
 
 In `in` you can put whatever you want. These are the event values. You can call them with `in.something`.
 
@@ -144,7 +144,7 @@ async def init(self, node):
        pass
 ```
 
-### Execution methods 
+### Execution methods
 
 These methods receive as argument a `ctx` [JobContext](https://openagentsinc.github.io/openagents-node-python-sdk/JobContext.html) object.
 The `ctx` object contains several methods that can be used to get useful informations related to the job (including inputs and parameters) and to comunicate with the pool's api, see [the documentation](https://openagentsinc.github.io/openagents-node-python-sdk/JobContext.html) for more details.
