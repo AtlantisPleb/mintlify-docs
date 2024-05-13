@@ -27,11 +27,13 @@ The runner class must be defined with all the parameters that are required by th
 - Definition of a runner class:
 
 ```python
+# Define a runner
 class MyRunner (JobRunner):
     def __init__(self):
         # Set the runner metadata, template and filter
         super().__init__(\
             RunnerConfig(
+                meta={ # ...
 ```
 
 **Metadata** are required. You can set them in the "meta" object. This is general information about the node, so you can enter whatever you want.
@@ -95,7 +97,7 @@ template="""
         ["expiration", "{{sys.expiration_timestamp_seconds}}"],
     ],
     "content":""
-}""",
+}"""
 ```
 
 **Socket** is in [json schema](https://json-schema.org/).
@@ -119,7 +121,7 @@ sockets={
             "description":"This is an array of queries",
             "items": {
                 "type":"string"
-            }
+            },
         }
     },
     "out": {
