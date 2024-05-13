@@ -4,71 +4,14 @@ description: 'Create agents, earn rewards'
 icon: 'robot'
 ---
 
-# How to Build an Agent - Quick Tutorial
+## How to build an agent
 
-![f1 (2)](https://github.com/OpenAgentsInc/openagents/assets/93095163/390342ec-c7cb-4483-a671-995eb6daac7a)
+1) Visit [openagents.com/create](https://openagents.com/create).
 
-1) You can build your Agent using the Agent Builder page (in the figure).
+2) Give the agent a name, description, and (optionally) an image.
 
-2) During preparation, give your Agent a name and provide a brief description of what it's supposed to do.
+3) Add instructions for the agent to follow. This is the initial prompt for the agent.
 
-3) Then enter the "Instructions" that the Agent must follow to execute the work you want it to carry out. You can think
-   of this field as an initial prompt for your agent.
+4) Optionally add a PDF the agent will use as knowledge to consult before responding. (Read more about our RAG algorithm [here](/rag).)
 
-4) In the "Knowledge" section, click "Upload files" to provide the information needed to specialize to your agent. The
-   currently supported formats are URL, PDF and plain text.
-
-5) When you are finished with the configuration, click "Save". The Agent will be available in the sidebar on the
-   OpenAgents chat screen.
-
-## How This Works (MVP v1 - RAG Agent)
-
-The user builds the Agent from the Agent Builder UI (MVP version in the img).
-
-The user provides name and description of what the agent does, and the specific parameters it needs to operate, that
-are "Instructions" and "Knowledge".
-
-As the user save the Agent build, they can evoke it (semantic routes) and interact with it via Chat UI.
-
-On the back-end, the Agent will send an event template to
-the [Nostr implementation](https://github.com/OpenAgentsInc/openagents/wiki/Nostr-integration) for the execution.
-
-The communication between the OpenAgents platform Laravel codebase and Nostr are performed through
-a [gRPC client](https://github.com/OpenAgentsInc/openagents/wiki/Agent-Builder-MVP-Spec#laravel---grpc-connection)
-intermediary (OpenAgents gRPC Client
-documentation [here](https://openagentsinc.github.io/openagents-grpc-proto/__default.html#service-PoolConnector)).
-
-The event template is compiled with the following params:
-
-* `poolAddress` = the host
-
-* `query` = the LLM generated rag query from the user input ("Instructions") + chat history (**Thread**)
-
-* `documents` = knowledge files as array of URLs (**File**)
-
-* `k` = how many chunks to return
-
-* `max_tokens` = numbers of tokens for text chunk
-
-* `overlap` = overlap between chunks
-
-* `encryptFor` = encrypt for a specific provider, so it can see it’s content
-
-### RAG Agent Pipeline
-
-![NVIDIA-RAG-diagram-scaled](https://github.com/OpenAgentsInc/openagents/assets/93095163/fa848c08-2c02-47bf-a8bd-93053a5e22bd)
-[source](https://blogs.nvidia.com/blog/what-is-retrieval-augmented-generation/)
-
-The above is a representation of a RAG Agent pipeline.
-
-OpenAgents' RAG Agent handle these phases with the following plugins/standalone nodes:
-
-* Retrieve Document: [Openagents Document Retrieval Node](https://github.com/riccardobl/openagents-document-retrieval)
-
-* Embedding model: [Openagents Embeddings Node](https://github.com/riccardobl/openagents-embeddings)
-
-* Vector DB: [Openagents Search Node](https://github.com/riccardobl/openagents-search)
-
-These three nodes are coordinated by
-the [RAG Coordinator](https://github.com/riccardobl/openagents-rag-coordinator-plugin)
-Extism [plugin](https://github.com/OpenAgentsInc/openagents/wiki/Plugins).
+5) Click the save button and your agent is live. File uploads may take ~30 seconds to process. Your agent will say 'Ready' when the knowledge has finished processing.
