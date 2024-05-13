@@ -51,7 +51,7 @@
       ]
     },
     {
-      "group": "Advanced",
+      "group": "Advanced Agents",
       "pages": [
         "plugins",
         "python-sdk"
