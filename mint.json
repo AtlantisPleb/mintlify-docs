@@ -34,6 +34,11 @@
       "name": "Changelog",
       "icon": "newspaper",
       "url": "https://openagents.com/changelog"
+    },
+    {
+      "name": "Community",
+      "icon": "users",
+      "url": "https://stacker.news/~openagents"
     }
   ],
   "navigation": [
