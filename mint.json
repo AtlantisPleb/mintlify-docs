@@ -53,6 +53,7 @@
     {
       "group": "Advanced",
       "pages": [
+        "architecture",
         "plugins",
         "python-sdk"
       ]
