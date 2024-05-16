@@ -55,7 +55,9 @@
       "pages": [
         "architecture",
         "plugins",
-        "python-sdk"
+        "python-sdk",
+        "running-a-pool",
+        "custom-rag-pipeline"
       ]
     }
   ],

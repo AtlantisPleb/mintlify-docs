@@ -1,0 +1,66 @@
+---
+title: 'Running a Pool'
+description: 'Learn how to start an OpenAgents Pool for yourself, your friends, or your community.'
+icon: 'network-wired'
+---
+
+<Warning>The pool software is still in development, expect bugs and incomplete features.</Warning>
+<Warning>Experimental: Specifications are subject to change.</Warning>
+
+
+An OpenAgents pool is a software that acts as a middleman between nodes and the nostr relay network.
+The OpenAgents pool acts as the service 
+provider in the [NIP-90 protocol flow](https://github.com/nostr-protocol/nips/blob/master/90.md#protocol-flow), it is responsible for
+coordinating and assigning jobs to the nodes that are connected to it and  for providing some basic apis and services that can
+facilitate the interaction between the nodes and the network.
+To make an analogy you can think of it as a bitcoin mining pool with nodes that act as job miners.
+
+## Requirements
+- An host with [docker](https://docs.docker.com/engine/install/) installed and configured
+- Basic knowledge on how to use a terminal and docker
+- The link to a public nostr relay (eg. `wss://nostr.openagents.com:7777`)
+
+<Info>The pool host need to be accessible from the nodes that you wish to connect.
+However it is not necessary to make it publicly accessible to the internet, since pool2pool and user2pool communication happens over nostr</Info>
+
+
+## Install and run with docker
+
+To run the OpenAgents pool you can use the following docker command:
+
+```bash
+docker run -d \
+    --name=openagents-pool \
+    -p5021:5021 \
+    -ePOOL_GRPC_BINDING_PORT=5021 \
+    -eNOSTR_RELAYS="wss://nostr.openagents.com:7777" \
+ghcr.io/openagentsinc/openagents-pool
+```
+
+The pool will be available on port 5021, you can change the port by changing the `-p5021:5021` and the `POOL_GRPC_BINDING_PORT` environment variable.
+
+<Info>
+By default the pool will create a random nostr secret key to authenticate with the network.
+If you want you can provide a custom secret key by adding 
+```bash
+-ePOOL_NOSTR_SECRET_KEY="your_secret_key"
+``` 
+to the docker command.
+</Info>
+
+
+<Info>
+To enable SSL you can add the following to the docker command:
+```bash
+-v/path/of/your/cert/folder:/certs \
+-ePOOL_GRPC_SERVER_CRT=/certs/fullchain.pem \
+-ePOOL_GRPC_SERVER_KEY=/certs/privkey.pem 
+```
+You will need to ensure you have valid certificates in the folder, you can use [letsencrypt](https://letsencrypt.org/) to get free certificates.
+</Info>
+
+The pool will start and listen for incoming connections from the nodes, and job requests.
+You can check the logs with `docker logs --follow openagents-pool` to see if everything is working correctly.
+
+
+To learn how to setup a basic rag pipeline check the [Setting up a RAG pipeline](/custom-rag-pipeline) page.

@@ -1,0 +1,274 @@
+---
+title: 'Self-hosting a RAG pipeline'
+description: 'Learn how to self-host the nodes needed to run a RAG pipeline'
+icon: 'passport'
+---
+
+<Warning>This software is still in development, expect bugs and incomplete features.</Warning>
+<Warning>Experimental: Specifications are subject to change.</Warning>
+
+
+This guide will show you how to set up a RAG pipeline on your own hardware, you will need a pool already configured and running, see the [Running a Pool](/running-a-pool) for more information.
+
+The RAG pipeline requires the following components:
+- [**Document retrieval node**](#starting-the-retrieval-node): A node that fetches and transforms document into markdown from the web
+- [**Embedding node**](#starting-the-embedding-node):  A node that converts documents and queries into searchable vectors
+    - [**Using a local model**](#using-a-local-model)
+    - [**Using OpenAI**](#using-openai)
+- [**Search node**](#starting-the-search-node) : A node that creates indexes from the vectors and performs similarity searches
+- [**Extism Runtime**](#starting-the-extism-runtime) : A general purpose node that runs Extism plugins. We will use it to run the RAG coordinator plugin
+- [**The RAG Coordinator plugin**](#getting-the-rag-coordinator-plugin): A plugin that coordinates the other nodes and provides a single request endpoint for the pipeline
+
+
+## Requirements
+- A pool running on the same network. See the [Running a Pool](/running-a-pool) guide for more information.
+- An host with [docker](https://docs.docker.com/engine/install/) installed and configured (could be the same host as the pool).
+- Basic knowledge on how to use a terminal and docker
+
+
+## Starting the retrieval node
+
+```bash
+docker run -d \
+    --name=retrieval \
+    -ePOOL_ADDRESS="127.0.0.1" \
+    -ePOOL_PORT="5021" \
+    -ePOOL_SSL="false" \
+ghcr.io/openagentsinc/openagents-document-retrieval
+```
+
+<Info>
+Replace `POOL_ADDRESS`, `POOL_PORT` with the correct values for your pool.
+</Info>
+<Info>
+If the pool is using SSL set `POOL_SSL` to `true`
+</Info>
+
+You can check the logs of the container with `docker logs --follow retrieval` to see if it started correctly.
+
+<Info>
+By default the node will use a random "NODE_TOKEN" to authenticate with the pool.
+You can provide a custom token by setting a valid nostr secret in the docker command:
+```bash
+-eNODE_TOKEN="your_token"
+```
+Note: The token is communicated to the pool in plain text, so you should generate a new token only for this purpose.
+</Info>
+
+
+
+## Starting the embedding node
+
+### Using a local model
+
+You can use any local model that is compatible with the [Sentence Transformers](https://sbert.net/) library.
+```bash
+docker run -d \
+    --name=embeddings \
+    -ePOOL_ADDRESS="127.0.0.1" \
+    -ePOOL_PORT="5021" \
+    -ePOOL_SSL="false" \
+    -eEMBEDDINGS_TRANSFORMERS_DEVICE="-1" \
+    -eEMBEDDINGS_MODEL="intfloat/multilingual-e5-base" \
+    -eEMBEDDINGS_MAX_TEXT_LENGTH="512" \
+ghcr.io/openagentsinc/openagents-embeddings
+```
+
+<Tip>
+You can run the model on a Nvidia GPU by setting `EMBEDDINGS_TRANSFORMERS_DEVICE` to the numeric id of a cuda device (eg. 0).
+And by passing `--gpus all` to the docker run command.
+Ensure you have the correct drivers and the [nvidia container runtime](https://developer.nvidia.com/container-runtime) installed.
+</Tip>
+<Info>
+Replace `POOL_ADDRESS`, `POOL_PORT` with the correct values for your pool.
+</Info>
+<Info>
+If the pool is using SSL set `POOL_SSL` to `true`
+</Info>
+
+You can check the logs of the container with `docker logs --follow embeddings` to see if it started correctly.
+
+<Info>
+By default the node will use a random "NODE_TOKEN" to authenticate with the pool.
+You can provide a custom token by setting a valid nostr secret in the docker command:
+```bash
+-eNODE_TOKEN="your_token"
+```
+Note: The token is communicated to the pool in plain text, so you should generate a new token only for this purpose.
+</Info>
+
+
+### Using OpenAI
+```bash
+docker run -d \
+    --name=embeddings \
+    -ePOOL_ADDRESS="127.0.0.1" \
+    -ePOOL_PORT="5021" \
+    -ePOOL_SSL="false" \
+    -eEMBEDDINGS_TRANSFORMERS_DEVICE="-1" \
+    -eEMBEDDINGS_MODEL="openai:text-embedding-3-small" \
+    -eEMBEDDINGS_MAX_TEXT_LENGTH="1024" \
+ghcr.io/openagentsinc/openagents-embeddings
+```
+<Info>
+Replace `POOL_ADDRESS`, `POOL_PORT` with the correct values for your pool.
+</Info>
+<Info>
+If the pool is using SSL set `POOL_SSL` to `true`
+</Info>
+
+You can check the logs of the container with `docker logs --follow embeddings` to see if it started correctly.
+
+<Info>
+By default the node will use a random "NODE_TOKEN" to authenticate with the pool.
+You can provide a custom token by setting a valid nostr secret in the docker command:
+```bash
+-eNODE_TOKEN="your_token"
+```
+Note: The token is communicated to the pool in plain text, so you should generate a new token only for this purpose.
+</Info>
+
+
+## Starting the search node
+
+```bash
+docker run -d \
+    --name=search \
+    -ePOOL_ADDRESS="127.0.0.1" \
+    -ePOOL_PORT="5021" \
+    -ePOOL_SSL="false" \
+ghcr.io/openagentsinc/openagents-search
+```
+<Info>
+Replace `POOL_ADDRESS`, `POOL_PORT` with the correct values for your pool.
+</Info>
+<Info>
+If the pool is using SSL set `POOL_SSL` to `true`
+</Info>
+
+You can check the logs of the container with `docker logs --follow search` to see if it started correctly.
+
+<Info>
+By default the node will use a random "NODE_TOKEN" to authenticate with the pool.
+You can provide a custom token by setting a valid nostr secret in the docker command:
+```bash
+-eNODE_TOKEN="your_token"
+```
+Note: The token is communicated to the pool in plain text, so you should generate a new token only for this purpose.
+</Info>
+
+
+## Starting the Extism Runtime
+
+```bash
+docker run -d \
+    --name=extism-runtime \
+    -ePOOL_ADDRESS="127.0.0.1" \
+    -ePOOL_PORT="5021" \
+    -ePOOL_SSL="false" \
+ghcr.io/openagentsinc/openagents-extism-runtime
+```
+<Info>
+Replace `POOL_ADDRESS`, `POOL_PORT` with the correct values for your pool.
+</Info>
+<Info>
+If the pool is using SSL set `POOL_SSL` to `true`
+</Info>
+
+You can check the logs of the container with `docker logs --follow extism-runtime` to see if it started correctly.
+
+<Info>
+By default the node will use a random "NODE_TOKEN" to authenticate with the pool.
+You can provide a custom token by setting a valid nostr secret in the docker command:
+```bash
+-eNODE_TOKEN="your_token"
+```
+Note: The token is communicated to the pool in plain text, so you should generate a new token only for this purpose.
+</Info>
+
+
+
+## Getting the RAG Coordinator plugin
+
+For this step your are going to need only the public direct link for a RAG Coordinator plugin, 
+you can get one from the [openagents-rag-coordinator-plugin's Release page](https://github.com/OpenAgentsInc/openagents-rag-coordinator-plugin/releases).
+
+```
+https://github.com/OpenAgentsInc/openagents-rag-coordinator-plugin/releases/download/v0.2/rag.wasm
+```
+
+
+## Testing the RAG Pipeline
+
+If you've been following along, you should have the following containers running:
+- retrieval
+- embeddings
+- search
+- extism-runtime
+
+all connected to the pool.
+
+If that's the case, the rag component should be ready to use.
+
+
+### Testing the RAG pipeline manually
+
+You can now craft a nostr [NIP-90](https://github.com/nostr-protocol/nips/blob/master/90.md) [**Job Request**](https://github.com/nostr-protocol/nips/blob/master/90.md#job-request-kind5000-5999) to run the RAG pipeline.
+
+<Warning>
+Kind 5003 is a custom kind we use for generic openagents jobs, this might change in the future.
+</Warning>
+
+```json
+{
+  "kind": 5003,
+  "created_at": $currentTimeInSeconds,
+  "tags": [
+    ["param","run-on","openagents/extism-runtime"],
+    ["expiration", "$currentTimeInSecondsPLUS10mins"],
+    ["param","main","https://github.com/OpenAgentsInc/openagents-rag-coordinator-plugin/releases/download/v0.2/rag.wasm"],
+    ["param","k","1"],
+    ["param","max-tokens","256"],
+    ["param","quantize","false"],
+    ["i","https://bitcoin.org/bitcoin.pdf","url","","passage"],
+    ["i","The quick brown fox jumps over the lazy dog.","text","", "passage"],
+    ["i","Who invented bitcoin?","text","","query"]
+  ],
+  "content": ""
+}
+```
+<Info>
+Replace \$currentTimeInSeconds and \$currentTimeInSecondsPLUS10mins with valid values
+</Info>
+
+As you can see, this event calls the RAG coordinator plugin on top of an extism-runtime node, 
+with some inputs ( **i** tags) with  one or more documents (as urls or plain text) marked with the "passage" marker,
+and a query marked with the "query" marker.
+
+After this event is broadcasted to the relay, you will receive a [Job feedback](https://github.com/nostr-protocol/nips/blob/master/90.md#job-feedback) event
+with `status=="success"` after which you will be able to get the job results by fetching 
+a [Job result](https://github.com/nostr-protocol/nips/blob/master/90.md#job-result-kind6000-6999) event of `kind==6003` *(5003+1000)*
+and `e` tag equivalent to the **Job Request** event id.
+
+<Warning>
+If you are using a public Nostr relay, there might be other pools listening for the same kind of job,
+so you might actually get the job results from someone else. 
+
+To avoid this you can run your own private relay or enforce the use of a specific pool by setting your pool's
+nostr public key in the `p` tag of the **Job Request**.
+
+Additionally you can also **encrypt** the request for the same public key, using NIP-04 as explained [here](https://github.com/nostr-protocol/nips/blob/master/90.md#encrypted-params).
+</Warning>
+
+<Tip>
+See the [NIP-90 specification](https://github.com/nostr-protocol/nips/blob/master/90.md) for more information on the protocol flow.
+</Tip>
+
+### Testing the RAG pipeline with our cli demo
+
+Work in progress
+
+<Warning>
+This is a work in progress, the cli is not yet available.
+</Warning>
+
