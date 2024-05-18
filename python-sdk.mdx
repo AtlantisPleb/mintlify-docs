@@ -31,7 +31,7 @@ The runner class must be defined with all the parameters that are required by th
 class MyRunner (JobRunner):
     def __init__(self):
         # Set the runner metadata, template and filter
-        super().__init__(\
+        super().__init__(
             RunnerConfig(
                 meta={ # ...
 ```
@@ -44,11 +44,11 @@ The “kind” value should always be “5003”, as this is the standard curren
 meta={
     "kind":5003,
     "name":"My Action",
-    "description":"This is a new action"
+    "description":"This is a new action",
     "tos": "https://example.com/tos",
     "privacy": "https://example.com/privacy",
     "picture": "https://example.com/icon.png",
-    "tags": ["tag1","tag2"]
+    "tags": ["tag1","tag2"],
     "website": "https://example.com",
     "author": "John Doe",
 },
@@ -59,7 +59,7 @@ meta={
 
 ```python
 filter={
-    "filterByKind":5003,
+    "filterByKind": "5003",
     #AND
     "filterByRunOn": "my-new-action"
 },
@@ -69,13 +69,13 @@ If you want to implement a worker for a standard nip-90 type job, like a kind [5
 In **template** there can be one or more inputs in the predefined tags:
 
 ```python
-["i", "{{value}}", "{{type}}", "",  "query"]
+["i", "{{value}}", "{{type}}", "",  "query"],
 ```
 
 There can also be 0 or more parameters, prefixed with param, then the key (name) and the value:
 
 ```python
-["param","run-on", "my-new-action" ]
+["param","run-on", "my-new-action" ],
 ```
 
 `run-on` is mandatory if and only if you create a 5003 event.
@@ -90,7 +90,7 @@ template="""
     "tags": [
         ["param","run-on", "my-new-action" ],
         ["param", "k", "{{in.k}}"],
-        ["output" , "{{out.content}}"]
+        ["output" , "{{out.content}}"],
         {{#in.queries}}
         ["i", "{{value}}", "{{type}}", "",  "query"],
         {{/in.queries}}
@@ -110,15 +110,15 @@ In `in` you can put whatever you want. These are the event values. You can call 
 sockets={
     "in": {
         "k": {
-            "title": "K",
-            "description":"This is a number"
+            "title": "MyNumber",
+            "description":"This is a number",
             "type":"integer",
-            "default": 0,
+            "default": 0
         },
         "queries": {
-            "title": "Queries",
+            "title": "MyArray",
             "type":"array",
-            "description":"This is an array of queries",
+            "description":"This is an array of strings",
             "items": {
                 "type":"string"
             }
