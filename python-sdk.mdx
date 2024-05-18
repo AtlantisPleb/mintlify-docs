@@ -5,7 +5,7 @@ icon: 'code'
 ---
 
 <Info>
-  **Prerequisite:** Python version 3.12 or higher.
+  **Prerequisite:** Python version 3.11 or higher.
 </Info>
 
 ## 1. Install the Python SDK on your OS
@@ -16,13 +16,7 @@ pip install openagents-node-sdk
 
 ## 2. Create a runner
 
-- Templates are based on the [NIP-01 implementation](https://github.com/nostr-protocol/nips/blob/master/01.md).
 
-- A template must follow the [NIP-90 implementation](https://github.com/nostr-protocol/nips/blob/master/90.md).
-
-Node example [here](https://github.com/OpenAgentsInc/openagents-node-python-sdk) ("RunnerConfig" code block):
-
-The runner class must be defined with all the parameters that are required by the NIPs.
 
 - Definition of a runner class:
 
@@ -36,15 +30,20 @@ class MyRunner (JobRunner):
                 meta={ # ...
 ```
 
-**Metadata** are required. You can set them in the "meta" object. This is general information about the node, so you can enter whatever you want.
+### Metadata
 
-The “kind” value should always be “5003”, as this is the standard currently adopted by OpenAgents.
+Metadata are required information about the node. You can set them in the "meta" object.
+
+The “kind” value is the job kind, you can use one from the [NIP-90 standard jobs](https://github.com/nostr-protocol/data-vending-machines/tree/master/kinds) \
+or "5003" that is the custom OpenAgents generic job kind.
+
+All the other fields are free to be filled in as you like.
 
 ```python
 meta={
-    "kind":5003,
-    "name":"My Action",
-    "description":"This is a new action",
+    "kind": 5003,
+    "name": "My Action",
+    "description": "This is a new action",
     "tos": "https://example.com/tos",
     "privacy": "https://example.com/privacy",
     "picture": "https://example.com/icon.png",
@@ -54,8 +53,21 @@ meta={
 },
 ```
 
-**Filters** are used to fetch jobs.
+<Info>
+The **tags** field might be used by other nodes to filter actions by type.
 
+We currently use the following tags:
+    - **tool**: if the action can be considered as a standalone tool for an LLM
+    
+But you can use any tag you like.
+</Info>
+
+
+### Filters
+Filters are regular expressions used to filter the jobs that the node can execute. 
+<Tip>
+You can check the [protocol definition](https://github.com/OpenAgentsInc/openagents-grpc-proto/blob/master/proto/rpc.proto#L31) for a list of filters that you can use.
+</Tip>
 
 ```python
 filter={
@@ -64,13 +76,31 @@ filter={
     "filterByRunOn": "my-new-action"
 },
 ```
-If you want to implement a worker for a standard nip-90 type job, like a kind [5050](https://github.com/nostr-protocol/data-vending-machines/blob/master/kinds/5050.md) (text generation), then you must filter by type. Standard type jobs have no "run-on".
 
-In **template** there can be one or more inputs in the predefined tags:
+<Info>
+Jobs of kind 5003 always have a "run-on" parameter that is used to define which OpenAgents node should execute the job.
+
+If you are writing a runner for a 5003 job kind, you should always use "filterByRunOn" with a custom name of you choice
+that you will use in the "run-on" parameter in the template (see below).
+</Info>
+
+
+### Templates
+Runner templates are [mustache](https://mustache.github.io/) templates based on 
+[NIP-01](https://github.com/nostr-protocol/nips/blob/master/01.md) and [NIP-90](https://github.com/nostr-protocol/nips/blob/master/90.md) that
+define the structure of the event that must be sent to nostr to invoke the runner.
+
+Inputs are defined as one ore more `["i"]` tags:
 
 ```python
 ["i", "{{value}}", "{{type}}", "",  "query"],
 ```
+
+They need a "value", a "type" and a "name or maker".
+
+As you can see value and type here are mustache's tags, we will see how they are replaced in the next section.
+
+"query" is the marker, it can be anything you want and its only purpose is to help you identify the input in the runner logic.
 
 There can also be 0 or more parameters, prefixed with param, then the key (name) and the value:
 
@@ -78,9 +108,11 @@ There can also be 0 or more parameters, prefixed with param, then the key (name)
 ["param","run-on", "my-new-action" ],
 ```
 
-`run-on` is mandatory if and only if you create a 5003 event.
+A param of type `run-on` is mandatory if you create a 5003 event and should be the same as the `filterByRunOn` in the filter.
 
-Events can be compiled with anything that is allowed in the [NIPs](https://github.com/nostr-protocol/nips).
+Events can contain anything that is defined in the [NIPs](https://github.com/nostr-protocol/nips) as they represent standard nostr events.
+
+The full template will look something like this:
 
 ```python
 template="""
@@ -99,12 +131,15 @@ template="""
     "content":""
 }"""
 ```
+<Tip>
+For more information on the mustache syntax, see the [official documentation](https://mustache.github.io/mustache.5.html).
+</Tip>
 
-**Socket** is in [json schema](https://json-schema.org/).
+### Sockets
 
-You must have a "socket in" dictionary for inputs and a "socket out" for ouputs.
+As you saw in the template, we use mustache tags prefixed with `in`, `out` and `sys`, these match the keys in the `sockets` object.
 
-In `in` you can put whatever you want. These are the event values. You can call them with `in.something`.
+You need to define the `in` and `out` sockets for your event like so:
 
 ```python
 sockets={
@@ -134,6 +169,17 @@ sockets={
     }
 }
 ```
+<Tip>
+The **socket** object is in JSON schema, you can check [the official documentation for more details](https://json-schema.org/).
+</Tip>
+
+These values can be accessed in the template using the mustache syntax by prefixing the key with `in` or `out` as we've seen in the previous section.
+
+The `sys` socket is defined by the environment, so you don't have to define it in the `sockets` object, but you can use its values in the template:
+- `sys.timestamp_seconds` is the current timestamp in seconds
+- `sys.expiration_timestamp_seconds` is the expiration timestamp for the event in seconds
+
+
 
 ## 3. Program the main logic of your node and initialize
 
@@ -152,7 +198,7 @@ async def init(self, node):
 ### Execution methods
 
 These methods receive as argument a `ctx` [JobContext](https://openagentsinc.github.io/openagents-node-python-sdk/JobContext.html) object.
-The `ctx` object contains several methods that can be used to get useful informations related to the job (including inputs and parameters) and to comunicate with the pool's api, see [the documentation](https://openagentsinc.github.io/openagents-node-python-sdk/JobContext.html) for more details.
+The `ctx` object contains several methods that can be used to get useful information related to the job (including inputs and parameters) and to comunicate with the pool's api, see [the documentation](https://openagentsinc.github.io/openagents-node-python-sdk/JobContext.html) for more details.
 
 `canRun` is a filter. Can be used to perform checks before deciding whether to run the job (`bool`):
 
@@ -195,3 +241,8 @@ A single instance of the JobRunner is used to process each compatible job, by de
 It is possible to configure the runner to run the jobs in parallel by calling `self.setRunInParallel(True)` inside the `init` method.
 
 *Note: Parallel runners should be written in valid non-blocking [asyncio](https://docs.python.org/3/library/asyncio.html) code.*
+
+
+## Full code example
+
+You can see a full example of a runner [here](https://github.com/OpenAgentsInc/openagents-node-python-sdk/blob/master/README.md).
