@@ -129,7 +129,7 @@ template="""
     "tags": [
         ["param","run-on", "my-new-action" ],
         ["param", "k", "{{in.k}}"],
-        ["output" , "{{out.content}}"],
+        ["output" , "{{in.outputType}}"],
         {{#in.queries}}
         ["i", "{{value}}", "{{type}}", "",  "query"],
         {{/in.queries}}
@@ -146,7 +146,7 @@ For more information on the mustache syntax, see the [official documentation](ht
 
 As you saw in the template, we use mustache tags prefixed with `in`, `out` and `sys`, these match the keys in the `sockets` object.
 
-You need to define the `in` and `out` sockets for your event like so:
+You need to define the `in` and `out` socket layouts in the runner class:
 
 ```python
 sockets={
@@ -164,18 +164,27 @@ sockets={
             "items": {
                 "type":"string"
             }
+        },
+        "outputType": {
+            "title": "Output Type",
+            "type": "string",
+            "description": "The output type of the event",
+            "default": "application/json"
         }
     },
     "out": {
-        "contentType": {
-            "title": "Content Type",
+        "output": {
+            "title": "Output",
             "type": "string",
-            "description": "The content of the event",
-            "default": "application/json"
+            "description": "The output content"
         }
     }
 }
 ```
+
+This object defines the structure of the inputs and outputs of the runner and will be used by the software, that wish to interact with it, together with the template to 
+create a nostr event.
+
 <Tip>
 The **socket** object is in JSON schema, you can check [the official documentation for more details](https://json-schema.org/).
 </Tip>
