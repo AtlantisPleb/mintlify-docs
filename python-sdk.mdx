@@ -8,13 +8,20 @@ icon: 'code'
   **Prerequisite:** Python version 3.11 or higher.
 </Info>
 
-## 1. Install the Python SDK on your OS
+## Install the Python SDK on your OS
 
 ```bash
 pip install openagents-node-sdk
 ```
 
-## 2. Create a runner
+## Import the SDK
+
+```python
+from openagents import JobRunner,OpenAgentsNode,NodeConfig,RunnerConfig
+```
+
+
+## Create a runner
 
 
 
@@ -181,11 +188,11 @@ The `sys` socket is defined by the environment, so you don't have to define it i
 
 
 
-## 3. Program the main logic of your node and initialize
+## The runner logic
 
 [API documentation](https://openagentsinc.github.io/openagents-node-python-sdk/index.html) for the SDK methods.
 
-### Initialize the runner class
+### The runner class
 
 The `init` method intitializes the runner class:
 
@@ -243,6 +250,60 @@ It is possible to configure the runner to run the jobs in parallel by calling `s
 *Note: Parallel runners should be written in valid non-blocking [asyncio](https://docs.python.org/3/library/asyncio.html) code.*
 
 
+## Create the node
+
+Now that you have defined the runner class, you can write the code to initialize and start the runner, you can do it in the same file:
+
+```python
+# Initialize the node
+myNode = OpenAgentsNode(NodeConfig(
+    meta={
+        "name": "My Node",
+        "description": "This is a new node",
+        "version": "1.0"
+    }
+))
+```
+
+name, description and version are required fields for the node metadata, you can set them as you like.
+
+
+Next you need to register the runner
+```python
+# Register the runner (you can register multiple runners)
+myNode.registerRunner(MyRunner())
+```
+
+And finally start the node:
+
+```python
+# Start the node
+myNode.start()
+```
+
 ## Full code example
 
 You can see a full example of a runner [here](https://github.com/OpenAgentsInc/openagents-node-python-sdk/blob/master/README.md).
+
+
+## Running the node
+
+If you have followed up to this point, you should have a runner class and a node ready to be executed.
+
+By default the node will connect to OpenAgents open pool *(playground.openagents.com 6021 ssl)*, this can be changed by setting the following environment variables:*
+
+```bash
+POOL_ADDRESS="playground.openagents.com" # custom pool address
+POOL_PORT="6021" #  custom pool port
+POOL_SSL="true" # or "false"
+```
+
+<Tip>
+To learn how to host your own pool check the [Running a Pool](/running-a-pool) documentation.
+</Tip>
+
+You can run the node with the following command:
+
+```python
+python myNode.py
+```
