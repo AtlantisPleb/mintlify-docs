@@ -8,24 +8,21 @@ Agent plugins are reusable pieces of code that add functionality to agents. Agen
 
 Plugins are written in any of [eight languages](https://extism.org/docs/concepts/pdk/) and compiled to WASM via the [Extism](https://extism.org/) framework.
 
-## Bitcoin bounties available
+## Create a plugin and earn sats
 
-For a limited time (until May 27th) we are paying bitcoin bounties of ₿1M each (~$600 USD as of 5/13) to plugin developers for their first agent plugin.
+Everyone can create and upload plugins to the public [OpenAgents Plugin Registry](https://openagents.com/plugins).
 
-You can see the plugins previously awarded bounties [here](https://openagents.com/plugins).
+Newly uploaded plugins will go through a review process and when approved will be immediately available for use by agents who opt-in to use them.
 
-To claim a bounty, follow these steps:
+When and agent uses a plugin, the plugin author will earn some sats based on the price set in the plugin configuration.
 
-1. Write an Extism plugin using one of their eight [plugin development kits](https://extism.org/docs/concepts/pdk/). It
-   must expose one function called 'run' that takes a single string parameter and returns a single string. (Use JSON
-   stringification as needed for larger objects.)
-2. Upload the code to a GitHub repo.
-3. Make a post in our Stacker News community like [this](https://stacker.news/items/537555) or [this](https://stacker.news/items/537303). Include the plugin name and description, GitHub repo, your [Lightning address](https://lightningaddress.com/) that should be used for rev-share rewards, and any other relevant info.
-4. [DM us on X](https://twitter.com/OpenAgentsInc) a link to the SN post.
-
-Rules:
-- GitHub account must be older than 1 month
+<Tip>
+The current agentic flow selects plugins automatically based on a combination of chat context, plugin metadata and input descriptions.
+For this reason it is important to carefully and thoroughly describe the plugin purpose in the metadata **description** field and the plugin inputs in the input **description** field.
+</Tip>
 
 ## Using plugins with agents
 
-We will soon offer a UI and API for using plugins with agents.
+Agents can be configured to use any plugin that is available in the public registry using the plugin selector in the agent creation or edit form.
+
+![Agent Plugin Selector](images/agent-plugin-selector.png)
